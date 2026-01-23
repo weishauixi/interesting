@@ -1,0 +1,42 @@
+<!--index.wxml - 主页面结构 -->
+<view class="container">
+  <!-- Canvas画布 - 粒子动画 -->
+  <canvas
+    canvas-id="particleCanvas"
+    id="particleCanvas"
+    class="canvas"
+    type="2d"
+    bindtouchstart="onTouchStart"
+    bindtouchmove="onTouchMove"
+    bindtouchend="onTouchEnd"
+    bindlongpress="onLongPress"
+  ></canvas>
+
+  <!-- 抽象文字层 - 漂浮的文字碎片 -->
+  <view class="text-layer">
+    <view
+      wx:for="{{textParticles}}"
+      wx:key="id"
+      class="text-particle"
+      style="left: {{item.x}}px; top: {{item.y}}px; color: {{item.color}}; opacity: {{item.opacity}}; font-size: {{item.size}}px;"
+    >
+      {{item.text}}
+    </view>
+  </view>
+
+  <!-- 控制按钮 -->
+  <view class="controls">
+    <button class="btn-control" bindtap="toggleMusic">
+      {{isPlayingMusic ? '⏸' : '🎵'}}
+    </button>
+    <button class="btn-control" bindtap="sharePoster">
+      📷
+    </button>
+    <button class="btn-control" bindtap="resetCanvas">
+      🔄
+    </button>
+  </view>
+
+  <!-- 提示信息 -->
+  <view class="hint">触摸·滑动·长按</view>
+</view>

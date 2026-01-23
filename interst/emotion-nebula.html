@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <title>情绪星云 - 抽象交互</title>
+  <style>
+    /* ========== 全局样式 ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* ========== 容器 ========== */
+    .container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+      background: #000;
+    }
+
+    /* ========== Canvas画布 ========== */
+    #particleCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+    }
+
+    /* ========== 文字粒子层 ========== */
+    .text-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .text-particle {
+      position: absolute;
+      font-weight: 300;
+      text-shadow: 0 0 10px currentColor;
+      transition: opacity 0.3s ease;
+      will-change: transform;
+      white-space: nowrap;
+    }
+
+    /* ========== 控制按钮 ========== */
+    .controls {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 10;
+    }
+
+    .btn-control {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0;
+      line-height: 1;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-control:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.05);
+    }
+
+    .btn-control:active {
+      transform: scale(0.95);
+    }
+
+    /* ========== 提示文字 ========== */
+    .hint {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 12px;
+      letter-spacing: 3px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* ========== 响应式 ========== */
+    @media (max-width: 768px) {
+      .controls {
+        bottom: 20px;
+        right: 20px;
+        gap: 10px;
+      }
+
+      .btn-control {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+      }
+
+      .hint {
+        bottom: 20px;
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Canvas画布 -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- 文字粒子层 -->
+    <div class="text-layer" id="textLayer"></div>
+
+    <!-- 控制按钮 -->
+    <div class="controls">
+      <button class="btn-control" id="btnMusic" title="音乐">🎵</button>
+      <button class="btn-control" id="btnSave" title="保存">📷</button>
+      <button class="btn-control" id="btnReset" title="重置">🔄</button>
+    </div>
+
+    <!-- 提示文字 -->
+    <div class="hint">触摸·滑动·长按</div>
+  </div>
+
+  <script>
+    // ========== 情绪星云 - 核心逻辑 ==========
+    // 粒子系统 | 动画循环 | 交互事件
+
+    class EmotionNebula {
+      constructor() {
+        // Canvas设置
+        this.canvas = document.getElementById('particleCanvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.textLayer = document.getElementById('textLayer');
+
+        // 粒子数组
+        this.particles = [];
+        this.textParticles = [];
+
+        // 抽象文字素材库
+        this.textSources = [
+          '梦', '雾', '光', '影', '尘', '风', '雨', '雪',
+          '流逝', '碎片', '褶皱', '飘浮', '沉没', '绽放',
+          '⌘', '⎔', '⎊', '∞', '◇', '○', '△', '□',
+          '霎那', '永恒', '虚无', '存在', '混沌',
+          '像风一样', '时光倒流', '星云破碎', '寂静回响'
+        ];
+
+        // 配色方案
+        this.colorPalettes = [
+          ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A'],  // 温暖
+          ['#A8E6CF', '#DCEDC1', '#FFD3B6', '#FFAAA5'],  // 柔和
+          ['#667eea', '#764ba2', '#f093fb', '#4facfe'],  // 梦幻
+          ['#00d2ff', '#3a7bd5', '#00b4db', '#1e3c72'],  // 冷调
+        ];
+
+        this.colors = [];
+        this.textParticleId = 0;
+
+        // 音频
+        this.audio = null;
+        this.isPlayingMusic = false;
+
+        // 交互状态
+        this.lastTouchPos = { x: 0, y: 0 };
+        this.touchStartTime = 0;
+        this.longPressTimer = null;
+
+        // 初始化
+        this.init();
+      }
+
+      init() {
+        this.resize();
+        this.initColors();
+        this.initParticles();
+        this.bindEvents();
+        this.startAnimation();
+        this.spawnTextParticles();
+
+        // 窗口大小改变
+        window.addEventListener('resize', () => this.resize());
+      }
+
+      // ========== Canvas初始化 ==========
+      resize() {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
+      }
+
+      // ========== 颜色初始化 ==========
+      initColors() {
+        const palette = this.colorPalettes[
+          Math.floor(Math.random() * this.colorPalettes.length)
+        ];
+        this.colors = [...palette];
+      }
+
+      // ========== 粒子系统核心 ==========
+      /**
+       * 创建粒子
+       * @param {number} x - X坐标
+       * @param {number} y - Y坐标
+       * @param {object} options - 可选参数
+       */
+      createParticle(x, y, options = {}) {
+        const shape = options.shape || ['circle', 'triangle', 'square'][
+          Math.floor(Math.random() * 3)
+        ];
+        const size = options.size || Math.random() * 20 + 5;
+        const color = options.color || this.colors[
+          Math.floor(Math.random() * this.colors.length)
+        ];
+
+        return {
+          x: x ?? Math.random() * this.width,
+          y: y ?? Math.random() * this.height,
+          vx: (Math.random() - 0.5) * 3,           // X轴速度
+          vy: (Math.random() - 0.5) * 3,           // Y轴速度
+          size: size,
+          targetSize: size,
+          currentSize: 0,
+          color: color,
+          shape: shape,
+          rotation: Math.random() * Math.PI * 2,   // 旋转角度
+          rotationSpeed: (Math.random() - 0.5) * 0.1,
+          life: 1,                                  // 生命值
+          decay: Math.random() * 0.002 + 0.0005,   // 衰减速度
+          alpha: Math.random() * 0.5 + 0.3,        // 透明度
+          trail: [],                                // 轨迹
+        };
+      }
+
+      /**
+       * 初始化粒子群
+       */
+      initParticles() {
+        const count = 50;
+        for (let i = 0; i < count; i++) {
+          this.particles.push(this.createParticle());
+        }
+      }
+
+      /**
+       * 更新粒子状态
+       */
+      updateParticles() {
+        this.particles = this.particles.filter(p => {
+          // 更新位置
+          p.x += p.vx;
+          p.y += p.vy;
+
+          // 边界反弹
+          if (p.x < 0 || p.x > this.width) p.vx *= -0.8;
+          if (p.y < 0 || p.y > this.height) p.vy *= -0.8;
+
+          // 旋转更新
+          p.rotation += p.rotationSpeed;
+
+          // 渐入效果
+          if (p.currentSize < p.targetSize) {
+            p.currentSize += 0.5;
+          }
+
+          // 记录轨迹
+          p.trail.push({ x: p.x, y: p.y });
+          if (p.trail.length > 20) p.trail.shift();
+
+          // 生命衰减
+          p.life -= p.decay;
+
+          return p.life > 0;
+        });
+
+        // 维持最小粒子数
+        while (this.particles.length < 30) {
+          this.particles.push(this.createParticle());
+        }
+      }
+
+      /**
+       * 绘制粒子
+       */
+      drawParticles() {
+        const ctx = this.ctx;
+
+        // 半透明背景实现拖尾效果
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, this.width, this.height);
+
+        this.particles.forEach(p => {
+          ctx.save();
+          ctx.globalAlpha = p.alpha * p.life;
+          ctx.fillStyle = p.color;
+
+          // 绘制轨迹
+          if (p.trail.length > 1) {
+            ctx.beginPath();
+            ctx.moveTo(p.trail[0].x, p.trail[0].y);
+            p.trail.forEach(point => {
+              ctx.lineTo(point.x, point.y);
+            });
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = p.size * 0.3;
+            ctx.globalAlpha = p.alpha * p.life * 0.3;
+            ctx.stroke();
+          }
+
+          // 绘制粒子
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rotation);
+          ctx.globalAlpha = p.alpha * p.life;
+
+          switch (p.shape) {
+            case 'circle':
+              ctx.beginPath();
+              ctx.arc(0, 0, p.currentSize, 0, Math.PI * 2);
+              ctx.fill();
+              break;
+
+            case 'triangle':
+              ctx.beginPath();
+              ctx.moveTo(0, -p.currentSize);
+              ctx.lineTo(p.currentSize * 0.866, p.currentSize * 0.5);
+              ctx.lineTo(-p.currentSize * 0.866, p.currentSize * 0.5);
+              ctx.closePath();
+              ctx.fill();
+              break;
+
+            case 'square':
+              ctx.fillRect(
+                -p.currentSize / 2,
+                -p.currentSize / 2,
+                p.currentSize,
+                p.currentSize
+              );
+              break;
+          }
+
+          ctx.restore();
+        });
+      }
+
+      /**
+       * 粒子分裂 - 触摸时触发
+       */
+      splitParticles(x, y) {
+        const splitCount = 8;
+        for (let i = 0; i < splitCount; i++) {
+          const angle = (Math.PI * 2 / splitCount) * i;
+          const speed = Math.random() * 4 + 2;
+          const particle = this.createParticle(x, y, {
+            size: Math.random() * 15 + 5,
+            color: this.colors[Math.floor(Math.random() * this.colors.length)]
+          });
+          particle.vx = Math.cos(angle) * speed;
+          particle.vy = Math.sin(angle) * speed;
+          particle.decay = 0.01;
+          this.particles.push(particle);
+        }
+
+        // 震动反馈（支持的设备）
+        if (navigator.vibrate) {
+          navigator.vibrate(50);
+        }
+      }
+
+      // ========== 动画循环 ==========
+      startAnimation() {
+        const animate = () => {
+          this.updateParticles();
+          this.drawParticles();
+          this.updateTextParticles();
+          requestAnimationFrame(animate);
+        };
+        animate();
+      }
+
+      // ========== 文字粒子系统 ==========
+      spawnTextParticles() {
+        setInterval(() => {
+          if (this.textParticles.length < 8) {
+            const text = this.textSources[
+              Math.floor(Math.random() * this.textSources.length)
+            ];
+            const color = this.colors[
+              Math.floor(Math.random() * this.colors.length)
+            ];
+
+            const textParticle = {
+              id: this.textParticleId++,
+              text: text,
+              x: Math.random() * (this.width - 100) + 50,
+              y: Math.random() * (this.height - 100) + 50,
+              vx: (Math.random() - 0.5) * 1,
+              vy: (Math.random() - 0.5) * 1,
+              color: color,
+              size: Math.random() * 20 + 14,
+              opacity: 0,
+              targetOpacity: Math.random() * 0.6 + 0.4,
+            };
+
+            this.textParticles.push(textParticle);
+            this.createTextElement(textParticle);
+          }
+        }, 3000);
+      }
+
+      createTextElement(particle) {
+        const el = document.createElement('div');
+        el.className = 'text-particle';
+        el.id = `text-${particle.id}`;
+        el.textContent = particle.text;
+        el.style.color = particle.color;
+        el.style.fontSize = `${particle.size}px`;
+        this.textLayer.appendChild(el);
+      }
+
+      updateTextParticles() {
+        this.textParticles = this.textParticles.filter(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          // 边界检测
+          if (p.x < 0 || p.x > this.width) p.vx *= -1;
+          if (p.y < 0 || p.y > this.height) p.vy *= -1;
+
+          // 渐入效果
+          if (p.opacity < p.targetOpacity) {
+            p.opacity = Math.min(p.opacity + 0.02, p.targetOpacity);
+          }
+
+          // 更新DOM
+          const el = document.getElementById(`text-${p.id}`);
+          if (el) {
+            el.style.left = `${p.x}px`;
+            el.style.top = `${p.y}px`;
+            el.style.opacity = p.opacity;
+          }
+
+          return true;
+        });
+      }
+
+      // ========== 交互事件绑定 ==========
+      bindEvents() {
+        const canvas = this.canvas;
+
+        // 触摸事件（移动端）
+        canvas.addEventListener('touchstart', (e) => this.onTouchStart(e), { passive: false });
+        canvas.addEventListener('touchmove', (e) => this.onTouchMove(e), { passive: false });
+        canvas.addEventListener('touchend', () => this.onTouchEnd());
+
+        // 鼠标事件（桌面端）
+        canvas.addEventListener('mousedown', (e) => this.onMouseDown(e));
+        canvas.addEventListener('mousemove', (e) => this.onMouseMove(e));
+        canvas.addEventListener('mouseup', () => this.onMouseEnd());
+
+        // 按钮事件
+        document.getElementById('btnMusic').addEventListener('click', () => this.toggleMusic());
+        document.getElementById('btnSave').addEventListener('click', () => this.saveImage());
+        document.getElementById('btnReset').addEventListener('click', () => this.resetCanvas());
+      }
+
+      getEventPos(e) {
+        if (e.touches) {
+          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+      }
+
+      // 触摸事件
+      onTouchStart(e) {
+        e.preventDefault();
+        const pos = this.getEventPos(e);
+        this.lastTouchPos = pos;
+        this.touchStartTime = Date.now();
+
+        this.splitParticles(pos.x, pos.y);
+
+        // 长按检测
+        this.longPressTimer = setTimeout(() => {
+          this.saveImage();
+        }, 800);
+      }
+
+      onTouchMove(e) {
+        e.preventDefault();
+        const pos = this.getEventPos(e);
+        const dx = pos.x - this.lastTouchPos.x;
+        const dy = pos.y - this.lastTouchPos.y;
+
+        // 影响附近粒子
+        this.particles.forEach(p => {
+          const dist = Math.hypot(p.x - pos.x, p.y - pos.y);
+          if (dist < 150) {
+            p.vx += dx * 0.02;
+            p.vy += dy * 0.02;
+          }
+        });
+
+        this.lastTouchPos = pos;
+      }
+
+      onTouchEnd() {
+        if (this.longPressTimer) {
+          clearTimeout(this.longPressTimer);
+          this.longPressTimer = null;
+        }
+      }
+
+      // 鼠标事件（桌面端）
+      onMouseDown(e) {
+        const pos = { x: e.clientX, y: e.clientY };
+        this.lastTouchPos = pos;
+        this.splitParticles(pos.x, pos.y);
+      }
+
+      onMouseMove(e) {
+        if (e.buttons === 1) {
+          const pos = { x: e.clientX, y: e.clientY };
+          const dx = pos.x - this.lastTouchPos.x;
+          const dy = pos.y - this.lastTouchPos.y;
+
+          this.particles.forEach(p => {
+            const dist = Math.hypot(p.x - pos.x, p.y - pos.y);
+            if (dist < 150) {
+              p.vx += dx * 0.02;
+              p.vy += dy * 0.02;
+            }
+          });
+
+          this.lastTouchPos = pos;
+        }
+      }
+
+      onMouseEnd() {}
+
+      // ========== 控制功能 ==========
+      toggleMusic() {
+        if (!this.audio) {
+          // 创建音频
+          this.audio = new Audio();
+          this.audio.loop = true;
+          this.audio.volume = 0.3;
+
+          // 使用免费的环境音乐资源
+          this.audio.src = 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3';
+
+          this.audio.play().then(() => {
+            this.isPlayingMusic = true;
+            document.getElementById('btnMusic').textContent = '⏸';
+          }).catch(err => {
+            console.log('音频播放需要用户交互');
+          });
+        } else {
+          if (this.isPlayingMusic) {
+            this.audio.pause();
+            this.isPlayingMusic = false;
+            document.getElementById('btnMusic').textContent = '🎵';
+          } else {
+            this.audio.play();
+            this.isPlayingMusic = true;
+            document.getElementById('btnMusic').textContent = '⏸';
+          }
+        }
+
+        if (navigator.vibrate) {
+          navigator.vibrate(30);
+        }
+      }
+
+      saveImage() {
+        if (this.longPressTimer) {
+          clearTimeout(this.longPressTimer);
+          this.longPressTimer = null;
+        }
+
+        if (navigator.vibrate) {
+          navigator.vibrate([50, 50, 50]);
+        }
+
+        // 创建下载链接
+        const link = document.createElement('a');
+        link.download = `情绪星云_${Date.now()}.png`;
+        link.href = this.canvas.toDataURL('image/png');
+        link.click();
+
+        // 显示提示
+        this.showToast('图片已保存');
+      }
+
+      resetCanvas() {
+        if (navigator.vibrate) {
+          navigator.vibrate([30, 30]);
+        }
+
+        // 清除粒子
+        this.particles = [];
+        this.textParticles = [];
+        this.textLayer.innerHTML = '';
+
+        // 重新初始化
+        this.initColors();
+        this.initParticles();
+
+        // 清空画布
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, this.width, this.height);
+
+        this.showToast('已重置');
+      }
+
+      showToast(message) {
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(255, 255, 255, 0.9);
+          color: #000;
+          padding: 15px 30px;
+          border-radius: 25px;
+          font-size: 14px;
+          z-index: 1000;
+          animation: fadeInOut 2s ease;
+        `;
+        document.body.appendChild(toast);
+
+        // 添加动画样式
+        if (!document.getElementById('toastStyle')) {
+          const style = document.createElement('style');
+          style.id = 'toastStyle';
+          style.textContent = `
+            @keyframes fadeInOut {
+              0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+              20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+              80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+              100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            }
+          `;
+          document.head.appendChild(style);
+        }
+
+        setTimeout(() => toast.remove(), 2000);
+      }
+    }
+
+    // ========== 启动应用 ==========
+    window.addEventListener('DOMContentLoaded', () => {
+      new EmotionNebula();
+    });
+  </script>
+</body>
+</html>
