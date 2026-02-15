@@ -1,0 +1,33 @@
+<!--components/greeting-card/greeting-card.wxml-->
+<view
+  class="greeting-card"
+  style="background: {{templateGradient}}"
+  bindtap="onCardTap"
+>
+  <view class="greeting-card-content">
+    <!-- 装饰图标 -->
+    <view class="decoration">🧧</view>
+
+    <!-- 祝福信息 -->
+    <view class="greeting-message">
+      <text class="message-text">{{displayMessage}}</text>
+    </view>
+
+    <!-- 底部信息 -->
+    <view class="greeting-footer">
+      <view class="sender-info">
+        <text class="label">来自：</text>
+        <text class="value">{{senderName}}</text>
+      </view>
+      <view class="recipient-info">
+        <text class="label">致：</text>
+        <text class="value">{{recipientName}}</text>
+      </view>
+    </view>
+
+    <!-- 时间 -->
+    <view class="greeting-time">
+      <text>{{timeAgo}}</text>
+    </view>
+  </view>
+</view>

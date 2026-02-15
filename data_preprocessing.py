@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Data Preprocessing for Diabetes Dataset
+data Preprocessing for Diabetes Dataset
 处理缺失值、异常值、数据标准化等
 """
 

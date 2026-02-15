@@ -1,0 +1,41 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/gallery/gallery",
+    "pages/upload/upload",
+    "pages/greeting/greeting"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#c0392b",
+    "navigationBarTitleText": "🐴马年新春祝福",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#fff5f5"
+  },
+  "tabBar": {
+    "color": "#666",
+    "selectedColor": "#c0392b",
+    "backgroundColor": "#fff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/greeting/greeting",
+        "text": "发祝福"
+      },
+      {
+        "pagePath": "pages/upload/upload",
+        "text": "上传"
+      },
+      {
+        "pagePath": "pages/gallery/gallery",
+        "text": "照片墙"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

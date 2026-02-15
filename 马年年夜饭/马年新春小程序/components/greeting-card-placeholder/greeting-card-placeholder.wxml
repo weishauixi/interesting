@@ -1,0 +1,23 @@
+<!--components/greeting-card-placeholder/greeting-card-placeholder.wxml-->
+<view class="greeting-card-placeholder">
+  <view class="greeting-card-skeleton">
+    <!-- 装饰图标占位 -->
+    <view class="skeleton-decoration"></view>
+
+    <!-- 消息占位 -->
+    <view class="skeleton-message">
+      <view class="skeleton-line skeleton-line-long"></view>
+      <view class="skeleton-line skeleton-line-medium"></view>
+      <view class="skeleton-line skeleton-line-short"></view>
+    </view>
+
+    <!-- 底部信息占位 -->
+    <view class="skeleton-footer">
+      <view class="skeleton-info skeleton-info-left"></view>
+      <view class="skeleton-info skeleton-info-right"></view>
+    </view>
+
+    <!-- 时间占位 -->
+    <view class="skeleton-time"></view>
+  </view>
+</view>

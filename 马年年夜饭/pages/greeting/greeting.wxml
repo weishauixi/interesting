@@ -1,0 +1,102 @@
+<!--pages/greeting/greeting.wxml-->
+<view class="greeting-page">
+  <view class="container">
+    <text class="title">🧧 发送马年祝福 🧧</text>
+    <text class="subtitle">✨ 选择精美模板，定制专属祝福 ✨</text>
+
+    <!-- 模板选择 -->
+    <view class="card">
+      <text class="section-title">1️⃣ 选择祝福模板</text>
+
+      <view class="templates-grid">
+        <view
+          wx:for="{{templates}}"
+          wx:key="id"
+          class="template-card {{selectedTemplate === item.id ? 'active' : ''}}"
+          bindtap="selectTemplate"
+          data-id="{{item.id}}"
+        >
+          <view class="template-preview" style="background: {{item.gradient}}">
+            <text class="template-emoji">{{item.emoji}}</text>
+          </view>
+          <text class="template-name">{{item.name}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 表单填写 -->
+    <view class="card">
+      <text class="section-title">2️⃣ 填写祝福信息</text>
+
+      <view class="form-group">
+        <text class="form-label">您的昵称</text>
+        <input
+          class="form-input"
+          placeholder="请输入您的昵称（可选）"
+          value="{{form.senderName}}"
+          bindinput="onSenderNameInput"
+        />
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">祝福对象</text>
+        <input
+          class="form-input"
+          placeholder="如：所有人、爸爸妈妈、亲爱的朋友们..."
+          value="{{form.recipientName}}"
+          bindinput="onRecipientNameInput"
+        />
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">祝福语</text>
+        <textarea
+          class="form-textarea"
+          placeholder="输入您的祝福语..."
+          value="{{form.message}}"
+          bindinput="onMessageInput"
+          maxlength="200"
+        ></textarea>
+      </view>
+
+      <button class="btn btn-primary btn-block" bindtap="handleSubmit" disabled="{{submitting}}">
+        <text wx:if="{{!submitting}}">🎉 生成祝福卡片</text>
+        <text wx:else>生成中...</text>
+      </button>
+    </view>
+
+    <!-- 卡片预览 -->
+    <view class="card">
+      <text class="section-title">👁️ 卡片预览</text>
+
+      <view class="greeting-card-preview" style="background: {{selectedTemplateGradient}}">
+        <view class="preview-decoration">{{selectedTemplateEmoji}}</view>
+
+        <view class="preview-content">
+          <view class="preview-header">
+            <text class="preview-badge">马年新春</text>
+          </view>
+
+          <view class="preview-message">
+            {{displayMessage}}
+          </view>
+
+          <view class="preview-footer">
+            <view class="preview-from">
+              <text class="label">来自：</text>
+              <text class="value">{{form.senderName || '匿名'}}</text>
+            </view>
+            <view class="preview-to">
+              <text class="label">致：</text>
+              <text class="value">{{form.recipientName || '所有人'}}</text>
+            </view>
+          </view>
+
+          <view class="preview-date">
+            {{currentDate}}
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

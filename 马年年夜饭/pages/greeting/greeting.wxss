@@ -1,0 +1,139 @@
+/* pages/greeting/greeting.wxss */
+.greeting-page {
+  padding: 32rpx;
+}
+
+.section-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 32rpx;
+  color: #d32f2f;
+}
+
+/* 模板网格 */
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24rpx;
+  margin-bottom: 32rpx;
+}
+
+.template-card {
+  cursor: pointer;
+  border-radius: 24rpx;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 6rpx solid transparent;
+}
+
+.template-preview {
+  height: 120rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.template-emoji {
+  font-size: 64rpx;
+  filter: drop-shadow(0 4rpx 8rpx rgba(0, 0, 0, 0.2));
+}
+
+.template-name {
+  padding: 16rpx;
+  text-align: center;
+  font-size: 24rpx;
+  font-weight: 500;
+  background: white;
+  color: #d32f2f;
+  display: block;
+}
+
+.template-card.active {
+  border-color: #d32f2f;
+  box-shadow: 0 0 0 6rpx rgba(211, 47, 47, 0.3);
+}
+
+/* 预览卡片 */
+.greeting-card-preview {
+  border-radius: 32rpx;
+  padding: 64rpx;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  min-height: 600rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 32rpx;
+}
+
+.preview-decoration {
+  position: absolute;
+  font-size: 240rpx;
+  opacity: 0.2;
+  top: 40rpx;
+  right: 40rpx;
+}
+
+.preview-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.preview-header {
+  text-align: center;
+  margin-bottom: 48rpx;
+}
+
+.preview-badge {
+  display: inline-block;
+  padding: 16rpx 48rpx;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20rpx);
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.preview-message {
+  font-size: 32rpx;
+  line-height: 1.8;
+  text-align: center;
+  margin-bottom: 64rpx;
+  min-height: 160rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+.preview-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 32rpx;
+  font-size: 28rpx;
+}
+
+.preview-from,
+.preview-to {
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+}
+
+.label {
+  opacity: 0.8;
+}
+
+.value {
+  font-weight: 600;
+}
+
+.preview-date {
+  text-align: center;
+  font-size: 24rpx;
+  opacity: 0.7;
+}

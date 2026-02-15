@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "greeting-card": "/components/greeting-card/greeting-card"
+  },
+  "navigationBarTitleText": "🐴马年新春"
+}

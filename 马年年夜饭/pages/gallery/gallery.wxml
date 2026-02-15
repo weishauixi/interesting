@@ -1,0 +1,70 @@
+<!--pages/gallery/gallery.wxml-->
+<view class="gallery-page">
+  <view class="container">
+    <text class="title">🖼️ 年夜饭照片墙 🖼️</text>
+    <text class="subtitle">🎊 看看大家都在吃什么 🎊</text>
+
+    <!-- 统计信息 -->
+    <view class="stats-bar">
+      <view class="stat-item">
+        <text class="stat-value">{{photos.length}}</text>
+        <text class="stat-label">张照片</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-value">{{uniqueUploaders}}</text>
+        <text class="stat-label">位朋友参与</text>
+      </view>
+    </view>
+
+    <!-- 快速上传按钮 -->
+    <navigator url="/pages/upload/upload" open-type="switchTab" class="btn btn-primary btn-block">
+      <text>📸 上传我的年夜饭</text>
+    </navigator>
+
+    <!-- 加载状态 -->
+    <view wx:if="{{loading}}" class="loading">
+      <text>加载中...</text>
+    </view>
+
+    <!-- 照片墙 -->
+    <view wx:elif="{{photos.length > 0}}" class="gallery">
+      <view
+        wx:for="{{photos}}"
+        wx:key="id"
+        class="photo-card"
+        bindtap="previewPhoto"
+        data-photo="{{item}}"
+      >
+        <view class="photo-image">
+          <image src="{{item.imageUrl}}" mode="aspectFill" class="photo-img"></image>
+        </view>
+
+        <view class="photo-info">
+          <view class="photo-uploader">
+            <view class="uploader-avatar">{{item.avatar}}</view>
+            <text class="uploader-name">{{item.uploaderName}}</text>
+          </view>
+
+          <view wx:if="{{item.message}}" class="photo-message">
+            {{item.message}}
+          </view>
+
+          <view class="photo-footer">
+            <text class="photo-time">{{item.timeAgo}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:else class="empty-state">
+      <text class="empty-icon">📷</text>
+      <text class="empty-text">还没有人上传年夜饭照片</text>
+      <text class="empty-hint">快来上传第一张吧！</text>
+      <navigator url="/pages/upload/upload" open-type="switchTab" class="btn btn-primary">
+        上传年夜饭
+      </navigator>
+    </view>
+  </view>
+</view>

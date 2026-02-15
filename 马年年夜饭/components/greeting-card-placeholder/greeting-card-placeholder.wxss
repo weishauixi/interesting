@@ -1,0 +1,99 @@
+/* components/greeting-card-placeholder/greeting-card-placeholder.wxss */
+.greeting-card-placeholder {
+  border-radius: 32rpx;
+  padding: 48rpx;
+  margin-bottom: 32rpx;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  min-height: 300rpx;
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.1);
+}
+
+.greeting-card-skeleton {
+  position: relative;
+}
+
+/* 装饰图标占位 */
+.skeleton-decoration {
+  position: absolute;
+  top: 20rpx;
+  right: 20rpx;
+  width: 80rpx;
+  height: 80rpx;
+  background: #e0e0e0;
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* 消息占位 */
+.skeleton-message {
+  margin: 60rpx 0 32rpx 0;
+}
+
+.skeleton-line {
+  height: 36rpx;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  border-radius: 8rpx;
+  margin-bottom: 16rpx;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-line-long {
+  width: 100%;
+}
+
+.skeleton-line-medium {
+  width: 80%;
+}
+
+.skeleton-line-short {
+  width: 60%;
+  margin-bottom: 0;
+}
+
+/* 底部信息占位 */
+.skeleton-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.skeleton-info {
+  height: 28rpx;
+  width: 150rpx;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  border-radius: 8rpx;
+  animation: shimmer 1.5s infinite;
+}
+
+/* 时间占位 */
+.skeleton-time {
+  width: 100rpx;
+  height: 24rpx;
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+  background-size: 200% 100%;
+  border-radius: 8rpx;
+  margin: 0 auto;
+  animation: shimmer 1.5s infinite;
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 闪光动画 */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

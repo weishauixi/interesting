@@ -12,37 +12,67 @@
   <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi5a2m56We5piT6ZuoIFBybyIsInNob3J0X25hbWUiOiLlrabnpZkiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzAwMDAwMCIsInRoZW1lX2NvbG9yIjoiIzAwMDAwMCIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWwsJTNDc3ZnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zycgdmlld0JveD0nMCAwIDEwMCAxMDAnJTNFJTNDY2lyY2xlIGN4PSc1MCcgY3k9JzUwJyByPSc0NScgZmlsbD0ndXJsKCNncmFkKScanLyUzRSUzQ2RlZnMlM0UlM0NyYWRpYWxHcmFkaWVudCBpZD0nZ3JhZCclM0UlM0NzdG9wIG9mZnNldD0nMCUnIHN0b3AtY29sb3I9JyNGRjZCNkInLyUzRSUzQ3N0b3Agb2Zmc2V0PScxMDAlJyBzdG9wLWNvbG9yPScjNDVFQ0Q0JyUzRSUzQy9yYWRpYWxHcmFkaWVudCUzRSUzQy9kZWZzJTNFJTNDL3N2ZyUzRSIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ==">
 
   <style>
-    /* ========== 全局样式 ========== */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* ==================== 全局样式 ==================== */
+    :root {
+      --primary-glow: rgba(78, 205, 196, 0.6);
+      --accent-glow: rgba(255, 107, 107, 0.5);
+      --glass-bg: rgba(20, 20, 30, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --text-primary: rgba(255, 255, 255, 0.95);
+      --text-secondary: rgba(255, 255, 255, 0.65);
+      --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #000;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', sans-serif;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* ========== 容器 ========== */
+    /* ==================== 容器 ==================== */
     .container {
       width: 100vw;
       height: 100vh;
       position: relative;
       overflow: hidden;
-      background: #000;
-      transition: background 2s ease;
+      background: #0a0a0f;
+      transition: background 3s ease;
     }
 
-    /* ========== Canvas画布 ========== */
+    .container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ==================== Canvas画布 ==================== */
     #particleCanvas {
       width: 100%;
       height: 100%;
       display: block;
       touch-action: none;
+      position: relative;
+      z-index: 2;
     }
 
-    /* ========== 文字粒子层 ========== */
+    /* ==================== 文字粒子层 ==================== */
     .text-layer {
       position: absolute;
       top: 0;
@@ -50,205 +80,498 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 1;
+      z-index: 3;
     }
 
     .text-particle {
       position: absolute;
       font-weight: 300;
-      text-shadow: 0 0 10px currentColor;
-      transition: opacity 0.3s ease;
+      text-shadow:
+        0 0 10px currentColor,
+        0 0 20px currentColor,
+        0 0 30px currentColor;
+      transition: opacity 0.5s ease;
       will-change: transform;
       white-space: nowrap;
+      filter: brightness(1.2);
     }
 
-    /* ========== 情绪指示器 ========== */
-    .emotion-indicator {
+    /* ==================== 顶部导航栏 ==================== */
+    .top-bar {
       position: absolute;
-      top: 20px;
-      left: 20px;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 80px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 30px;
+      z-index: 100;
+      background: linear-gradient(to bottom, rgba(10, 10, 15, 0.9), transparent);
+    }
+
+    /* Logo */
+    .logo {
       display: flex;
       align-items: center;
-      gap: 10px;
-      z-index: 10;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 10px 20px;
-      border-radius: 25px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      gap: 12px;
+      padding: 12px 20px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      animation: slideInLeft 0.6s ease;
     }
 
-    .emotion-icon {
-      font-size: 24px;
-    }
-
-    .emotion-name {
-      color: #fff;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    /* ========== 快捷键提示 ========== */
-    .shortcuts {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 11px;
-      text-align: right;
-      line-height: 1.6;
-      z-index: 10;
-      display: none;
-    }
-
-    @media (min-width: 1024px) {
-      .shortcuts { display: block; }
-    }
-
-    .shortcuts kbd {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-right: 5px;
-    }
-
-    /* ========== 控制按钮 ========== */
-    .controls {
-      position: absolute;
-      bottom: 30px;
-      right: 30px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      z-index: 10;
-    }
-
-    .btn-control {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      font-size: 24px;
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary-glow), var(--accent-glow));
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 0;
-      line-height: 1;
+      font-size: 22px;
+      box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.5px;
+    }
+
+    .logo-subtitle {
+      font-size: 10px;
+      color: var(--text-secondary);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* 快捷键面板 */
+    .shortcuts-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      padding: 12px 18px;
+      border-radius: 14px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      animation: slideInRight 0.6s ease;
+    }
+
+    .shortcuts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px 20px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .shortcut-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .shortcut-item kbd {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: 'SF Mono', 'Monaco', monospace;
+      font-size: 10px;
+      color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      min-width: 24px;
+      text-align: center;
+    }
+
+    /* ==================== 情绪指示器 ==================== */
+    .emotion-indicator {
+      position: absolute;
+      top: 100px;
+      left: 30px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 100;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      padding: 16px 24px;
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      animation: slideInLeft 0.8s ease;
+      transition: all 0.3s ease;
+    }
+
+    .emotion-indicator:hover {
+      transform: translateX(5px);
+      box-shadow: 0 12px 40px rgba(78, 205, 196, 0.3);
+    }
+
+    .emotion-icon {
+      font-size: 36px;
+      filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3));
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .emotion-name {
+      color: var(--text-primary);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .emotion-desc {
+      display: none;
+      font-size: 11px;
+      color: var(--text-secondary);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* ==================== 情绪选择器 ==================== */
+    .emotion-dock {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      z-index: 100;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      padding: 14px 20px;
+      border-radius: 24px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      animation: slideInUp 0.8s ease;
+    }
+
+    .emotion-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      border: 2px solid transparent;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 26px;
       cursor: pointer;
-      transition: all 0.2s ease;
-      backdrop-filter: blur(10px);
+      transition: all 0.3s var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .emotion-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .emotion-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+    }
+
+    .emotion-btn:hover::before {
+      opacity: 1;
+    }
+
+    .emotion-btn.active {
+      border-color: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+      box-shadow:
+        0 0 20px rgba(78, 205, 196, 0.5),
+        0 8px 25px rgba(78, 205, 196, 0.3);
+    }
+
+    .emotion-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* ==================== 控制面板 ==================== */
+    .control-panel {
+      position: absolute;
+      bottom: 40px;
+      right: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 100;
+      animation: slideInRight 0.8s ease;
+    }
+
+    .btn-control {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      color: #fff;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--glass-border);
+      padding: 0;
+      cursor: pointer;
+      transition: all 0.3s var(--transition-smooth);
+      box-shadow: var(--glass-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-control::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
     .btn-control:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.08);
+      box-shadow:
+        0 8px 25px rgba(78, 205, 196, 0.4),
+        0 0 15px rgba(78, 205, 196, 0.3);
+    }
+
+    .btn-control:hover::before {
+      opacity: 1;
     }
 
     .btn-control:active {
       transform: scale(0.95);
     }
 
-    /* ========== 情绪选择器 ========== */
-    .emotion-selector {
+    /* Tooltip */
+    .btn-control::after {
+      content: attr(data-tooltip);
       position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 10px;
-      z-index: 10;
-      background: rgba(255, 255, 255, 0.1);
-      padding: 10px 15px;
-      border-radius: 30px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      right: 70px;
+      top: 50%;
+      transform: translateY(-50%) translateX(10px);
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      border: 1px solid var(--glass-border);
     }
 
-    .emotion-btn {
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      background: rgba(255, 255, 255, 0.1);
-      font-size: 22px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .btn-control:hover::after {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
     }
 
-    .emotion-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: scale(1.1);
-    }
-
-    .emotion-btn.active {
-      border-color: #fff;
-      background: rgba(255, 255, 255, 0.2);
-      transform: scale(1.1);
-    }
-
-    /* ========== 音乐可视化 ========== */
+    /* ==================== 音乐可视化 ==================== */
     .audio-visualizer {
       position: absolute;
       bottom: 0;
       left: 0;
       width: 100%;
-      height: 100px;
+      height: 120px;
       pointer-events: none;
-      z-index: 0;
-      opacity: 0.3;
+      z-index: 1;
+      opacity: 0.4;
     }
 
-    /* ========== 提示文字 ========== */
+    /* ==================== 提示文字 ==================== */
     .hint {
       position: absolute;
-      bottom: 130px;
+      bottom: 150px;
       left: 50%;
       transform: translateX(-50%);
-      color: rgba(255, 255, 255, 0.3);
-      font-size: 12px;
-      letter-spacing: 3px;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
       pointer-events: none;
-      z-index: 10;
+      z-index: 100;
       white-space: nowrap;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      padding: 10px 20px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      animation: fadeIn 1s ease 0.5s both;
     }
 
-    /* ========== Toast提示 ========== */
+    /* ==================== Toast提示 ==================== */
     .toast {
       position: fixed;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) scale(0.8);
-      background: rgba(255, 255, 255, 0.95);
-      color: #000;
-      padding: 15px 30px;
-      border-radius: 25px;
-      font-size: 14px;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: var(--glass-bg);
+      backdrop-filter: blur(30px);
+      color: var(--text-primary);
+      padding: 18px 36px;
+      border-radius: 20px;
+      font-size: 15px;
+      font-weight: 500;
       z-index: 1000;
       opacity: 0;
       pointer-events: none;
+      border: 1px solid var(--glass-border);
+      box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        0 0 40px rgba(78, 205, 196, 0.3);
+      letter-spacing: 0.5px;
     }
 
     .toast.show {
-      animation: toastAnim 2s ease forwards;
+      animation: toastAnim 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
 
     @keyframes toastAnim {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-      20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+      }
+      15% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      85% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.95);
+      }
     }
 
-    /* ========== 响应式 ========== */
+    /* ==================== 动画效果 ==================== */
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3));
+      }
+      50% {
+        transform: scale(1.05);
+        filter: drop-shadow(0 6px 16px rgba(255, 255, 255, 0.5));
+      }
+    }
+
+    /* ==================== 响应式设计 ==================== */
+    @media (max-width: 1024px) {
+      .shortcuts-panel {
+        display: none;
+      }
+    }
+
     @media (max-width: 768px) {
-      .controls {
-        bottom: 20px;
-        right: 20px;
+      .top-bar {
+        padding: 0 15px;
+        height: 70px;
+      }
+
+      .logo {
+        padding: 10px 16px;
+      }
+
+      .logo-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 20px;
+      }
+
+      .logo-title {
+        font-size: 14px;
+      }
+
+      .emotion-indicator {
+        top: 85px;
+        left: 15px;
+        padding: 12px 18px;
+        gap: 12px;
+      }
+
+      .emotion-icon {
+        font-size: 30px;
+      }
+
+      .emotion-name {
+        font-size: 15px;
+      }
+
+      .emotion-dock {
+        bottom: 25px;
+        padding: 12px 16px;
+        gap: 10px;
+      }
+
+      .emotion-btn {
+        width: 46px;
+        height: 46px;
+        font-size: 22px;
+      }
+
+      .control-panel {
+        bottom: 25px;
+        right: 15px;
         gap: 10px;
       }
 
@@ -258,36 +581,92 @@
         font-size: 20px;
       }
 
-      .emotion-selector {
-        bottom: 20px;
-        padding: 8px 12px;
-        gap: 8px;
-      }
-
-      .emotion-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
+      .btn-control::after {
+        display: none;
       }
 
       .hint {
-        bottom: 100px;
+        bottom: 120px;
+        padding: 8px 16px;
         font-size: 10px;
-        letter-spacing: 2px;
+        letter-spacing: 3px;
       }
 
+      .toast {
+        padding: 16px 28px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
       .emotion-indicator {
-        top: 15px;
-        left: 15px;
-        padding: 8px 15px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 10px 14px;
       }
 
-      .emotion-icon { font-size: 20px; }
-      .emotion-name { font-size: 12px; }
+      .emotion-icon {
+        font-size: 24px;
+      }
+
+      .emotion-dock {
+        padding: 10px 14px;
+        gap: 8px;
+        border-radius: 20px;
+      }
+
+      .emotion-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
+      }
+    }
+
+    /* ==================== 深色模式优化 ==================== */
+    @media (prefers-color-scheme: dark) {
+      html, body {
+        background: linear-gradient(135deg, #050508 0%, #0f0f1a 100%);
+      }
+    }
+
+    /* ==================== 加载动画 ==================== */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: #0a0a0f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .loading-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--primary-glow);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
+  <!-- 加载遮罩 -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+  </div>
+
   <div class="container" id="container">
     <!-- Canvas画布 -->
     <canvas id="particleCanvas"></canvas>
@@ -298,40 +677,58 @@
     <!-- 文字粒子层 -->
     <div class="text-layer" id="textLayer"></div>
 
+    <!-- 顶部导航栏 -->
+    <div class="top-bar">
+      <!-- Logo -->
+      <div class="logo">
+        <div class="logo-icon">✨</div>
+        <div class="logo-text">
+          <div class="logo-title">情绪星云</div>
+          <div class="logo-subtitle">Emotion Nebula</div>
+        </div>
+      </div>
+
+      <!-- 快捷键面板 -->
+      <div class="shortcuts-panel">
+        <div class="shortcuts-grid">
+          <div class="shortcut-item"><kbd>1</kbd>-<kbd>5</kbd> 情绪切换</div>
+          <div class="shortcut-item"><kbd>M</kbd> 音乐开关</div>
+          <div class="shortcut-item"><kbd>S</kbd> 保存图片</div>
+          <div class="shortcut-item"><kbd>R</kbd> 重置画布</div>
+          <div class="shortcut-item"><kbd>Space</kbd> 暂停播放</div>
+          <div class="shortcut-item"><kbd>滚轮</kbd> 缩放粒子</div>
+        </div>
+      </div>
+    </div>
+
     <!-- 情绪指示器 -->
     <div class="emotion-indicator">
       <span class="emotion-icon" id="emotionIcon">😊</span>
-      <span class="emotion-name" id="emotionName">Happy</span>
-    </div>
-
-    <!-- 快捷键提示 -->
-    <div class="shortcuts">
-      <kbd>1</kbd>-<kbd>5</kbd> 情绪切换<br>
-      <kbd>M</kbd> 音乐<br>
-      <kbd>S</kbd> 保存<br>
-      <kbd>R</kbd> 重置<br>
-      <kbd>Space</kbd> 暂停
+      <div class="emotion-info">
+        <div class="emotion-name" id="emotionName">快乐模式</div>
+        <div class="emotion-desc">Happy Mode</div>
+      </div>
     </div>
 
     <!-- 情绪选择器 -->
-    <div class="emotion-selector">
-      <button class="emotion-btn active" data-emotion="happy" title="快乐">😊</button>
-      <button class="emotion-btn" data-emotion="sad" title="悲伤">😢</button>
-      <button class="emotion-btn" data-emotion="angry" title="愤怒">😠</button>
-      <button class="emotion-btn" data-emotion="calm" title="平静">😌</button>
-      <button class="emotion-btn" data-emotion="energetic" title="活力">⚡</button>
+    <div class="emotion-dock">
+      <button class="emotion-btn active" data-emotion="happy" data-tooltip="快乐">😊</button>
+      <button class="emotion-btn" data-emotion="sad" data-tooltip="悲伤">😢</button>
+      <button class="emotion-btn" data-emotion="angry" data-tooltip="愤怒">😠</button>
+      <button class="emotion-btn" data-emotion="calm" data-tooltip="平静">😌</button>
+      <button class="emotion-btn" data-emotion="energetic" data-tooltip="活力">⚡</button>
     </div>
 
-    <!-- 控制按钮 -->
-    <div class="controls">
-      <button class="btn-control" id="btnMusic" title="音乐 (M)">🎵</button>
-      <button class="btn-control" id="btnSave" title="保存 (S)">📷</button>
-      <button class="btn-control" id="btnReset" title="重置 (R)">🔄</button>
-      <button class="btn-control" id="btnPause" title="暂停 (Space)">⏸️</button>
+    <!-- 控制面板 -->
+    <div class="control-panel">
+      <button class="btn-control" id="btnMusic" data-tooltip="音乐 (M)">🎵</button>
+      <button class="btn-control" id="btnSave" data-tooltip="保存 (S)">📷</button>
+      <button class="btn-control" id="btnReset" data-tooltip="重置 (R)">🔄</button>
+      <button class="btn-control" id="btnPause" data-tooltip="暂停 (Space)">⏸️</button>
     </div>
 
     <!-- 提示文字 -->
-    <div class="hint">点击·拖动·双指缩放·长按保存</div>
+    <div class="hint">点击·拖动·滚轮缩放·长按保存</div>
 
     <!-- Toast容器 -->
     <div class="toast" id="toast"></div>
@@ -359,8 +756,9 @@
     // ========== 情绪模式配置 ==========
     const EMOTION_CONFIGS = {
       happy: {
-        name: '快乐',
+        name: '快乐模式',
         icon: '😊',
+        desc: 'Happy',
         colors: ['#FFD93D', '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A'],
         speedMultiplier: 1.5,
         sizeMultiplier: 1.2,
@@ -373,8 +771,9 @@
         backgroundColor: 'rgba(255, 220, 100, 0.03)'
       },
       sad: {
-        name: '悲伤',
+        name: '悲伤模式',
         icon: '😢',
+        desc: 'Sad',
         colors: ['#6B7280', '#9CA3AF', '#D1D5DB', '#60A5FA', '#818CF8'],
         speedMultiplier: 0.5,
         sizeMultiplier: 0.8,
@@ -387,8 +786,9 @@
         backgroundColor: 'rgba(100, 120, 150, 0.03)'
       },
       angry: {
-        name: '愤怒',
+        name: '愤怒模式',
         icon: '😠',
+        desc: 'Angry',
         colors: ['#EF4444', '#F97316', '#DC2626', '#B91C1C', '#FCA5A5'],
         speedMultiplier: 2.5,
         sizeMultiplier: 1.5,
@@ -401,8 +801,9 @@
         backgroundColor: 'rgba(220, 50, 50, 0.04)'
       },
       calm: {
-        name: '平静',
+        name: '平静模式',
         icon: '😌',
+        desc: 'Calm',
         colors: ['#A7F3D0', '#6EE7B7', '#34D399', '#10B981', '#99F6E4'],
         speedMultiplier: 0.7,
         sizeMultiplier: 1.0,
@@ -415,8 +816,9 @@
         backgroundColor: 'rgba(100, 200, 150, 0.02)'
       },
       energetic: {
-        name: '活力',
+        name: '活力模式',
         icon: '⚡',
+        desc: 'Energetic',
         colors: ['#FBBF24', '#F59E0B', '#FCD34D', '#EAB308', '#FEF3C7'],
         speedMultiplier: 3.0,
         sizeMultiplier: 0.9,
@@ -500,6 +902,11 @@
         this.spawnTextParticles();
         this.setupAudioVisualizer();
 
+        // 隐藏加载动画
+        setTimeout(() => {
+          document.getElementById('loadingOverlay').classList.add('hidden');
+        }, 800);
+
         // 窗口大小改变
         window.addEventListener('resize', () => this.resize());
       }
@@ -516,7 +923,7 @@
 
       setupCanvas() {
         // 设置初始背景
-        this.ctx.fillStyle = '#000';
+        this.ctx.fillStyle = '#0a0a0f';
         this.ctx.fillRect(0, 0, this.width, this.height);
       }
 
@@ -658,7 +1065,7 @@
 
         // 动态背景渐变 - 基于粒子平均颜色
         const avgColor = this.getAverageParticleColor();
-        const bgColor = this.interpolateColor('#000000', avgColor, 0.1);
+        const bgColor = this.interpolateColor('#0a0a0f', avgColor, 0.1);
         ctx.fillStyle = this.hexToRgba(bgColor, 0.08);
         ctx.fillRect(0, 0, this.width, this.height);
 
@@ -823,6 +1230,7 @@
         // 更新UI
         document.getElementById('emotionIcon').textContent = this.emotionConfig.icon;
         document.getElementById('emotionName').textContent = this.emotionConfig.name;
+        document.querySelector('.emotion-desc').textContent = this.emotionConfig.desc;
 
         document.querySelectorAll('.emotion-btn').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.emotion === emotion);
@@ -836,7 +1244,7 @@
         this.textParticles = [];
         this.textLayer.innerHTML = '';
 
-        this.showToast(`切换到${this.emotionConfig.name}模式`);
+        this.showToast(`已切换至${this.emotionConfig.name}`);
       }
 
       /**
@@ -1260,21 +1668,17 @@
 
         this.vibrate([50, 50, 50]);
 
-        // 创建高分辨率画布
         const exportCanvas = document.createElement('canvas');
         exportCanvas.width = this.width * 2;
         exportCanvas.height = this.height * 2;
         const exportCtx = exportCanvas.getContext('2d');
         exportCtx.scale(2, 2);
 
-        // 绘制背景
-        exportCtx.fillStyle = '#000';
+        exportCtx.fillStyle = '#0a0a0f';
         exportCtx.fillRect(0, 0, this.width, this.height);
 
-        // 绘制粒子
         exportCtx.drawImage(this.canvas, 0, 0);
 
-        // 创建下载链接
         const link = document.createElement('a');
         link.download = `情绪星云_${this.currentEmotion}_${Date.now()}.png`;
         link.href = exportCanvas.toDataURL('image/png');
@@ -1297,7 +1701,7 @@
         this.setEmotion(randomEmotion);
 
         // 清空画布
-        this.ctx.fillStyle = '#000';
+        this.ctx.fillStyle = '#0a0a0f';
         this.ctx.fillRect(0, 0, this.width, this.height);
 
         this.showToast('画布已重置');
@@ -1326,7 +1730,7 @@
 
       // ========== 辅助方法 ==========
       getAverageParticleColor() {
-        if (this.particles.length === 0) return '#000000';
+        if (this.particles.length === 0) return '#0a0a0f';
 
         let r = 0, g = 0, b = 0;
         let count = 0;
@@ -1341,7 +1745,7 @@
           }
         });
 
-        if (count === 0) return '#000000';
+        if (count === 0) return '#0a0a0f';
 
         r = Math.round(r / count);
         g = Math.round(g / count);
@@ -1428,11 +1832,9 @@
     // ========== 启动应用 ==========
     window.addEventListener('DOMContentLoaded', () => {
       const app = new EmotionNebula();
-
-      // 暴露到全局以便扩展调用
       window.EmotionNebulaApp = app;
 
-      console.log('%c情绪星云 Pro', 'color: #4ECDC4; font-size: 24px; font-weight: bold;');
+      console.log('%c✨ 情绪星云 Pro', 'color: #4ECDC4; font-size: 24px; font-weight: bold;');
       console.log('%c粒子系统已启动 | 快捷键: 1-5 情绪 | M 音乐 | S 保存 | R 重置 | Space 暂停',
                   'color: #888; font-size: 12px;');
     });

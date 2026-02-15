@@ -1,0 +1,91 @@
+<!--pages/upload/upload.wxml-->
+<view class="upload-page">
+  <view class="container">
+    <text class="title">📸 上传年夜饭照片 📸</text>
+    <text class="subtitle">🎊 分享您的年夜饭，与大家共度佳节 🎊</text>
+
+    <!-- 上传表单 -->
+    <view class="card">
+      <text class="form-title">上传照片</text>
+
+      <!-- 图片上传区域 -->
+      <view class="form-group">
+        <text class="form-label">选择照片（最多3张）</text>
+
+        <view class="upload-area" bindtap="chooseImage">
+          <view wx:if="{{previewImages.length === 0}}" class="upload-placeholder">
+            <text class="upload-icon">📷</text>
+            <text>点击选择图片</text>
+            <text class="upload-limit">支持 JPG、PNG 格式，单张不超过 5MB</text>
+          </view>
+
+          <view wx:else class="preview-list">
+            <view wx:for="{{previewImages}}" wx:key="index" class="preview-item">
+              <image src="{{item}}" mode="aspectFill" class="preview-image"></image>
+              <view class="remove-btn" bindtap="removeImage" data-index="{{index}}">✕</view>
+            </view>
+
+            <view wx:if="{{previewImages.length < 3}}" class="preview-add">
+              <text class="add-icon">+</text>
+              <text class="add-text">添加</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 昵称 -->
+      <view class="form-group">
+        <text class="form-label">您的昵称</text>
+        <input
+          class="form-input"
+          placeholder="请输入您的昵称"
+          value="{{form.uploaderName}}"
+          bindinput="onUploaderNameInput"
+        />
+      </view>
+
+      <!-- 新年寄语 -->
+      <view class="form-group">
+        <text class="form-label">新年寄语</text>
+        <textarea
+          class="form-textarea"
+          placeholder="说点什么吧..."
+          value="{{form.message}}"
+          bindinput="onMessageInput"
+          maxlength="100"
+        ></textarea>
+      </view>
+
+      <!-- 隐私设置 -->
+      <view class="form-group">
+        <label class="checkbox-label" bindtap="togglePublic">
+          <checkbox checked="{{form.isPublic}}" color="#c0392b"/>
+          <text>公开显示在年夜饭照片墙</text>
+        </label>
+      </view>
+
+      <!-- 提交按钮 -->
+      <button class="btn btn-primary btn-block" bindtap="handleSubmit" disabled="{{submitting || previewImages.length === 0}}">
+        <text wx:if="{{!submitting}}">🎉 上传照片</text>
+        <text wx:else>上传中...</text>
+      </button>
+    </view>
+
+    <!-- 上传说明 -->
+    <view class="card tips-card">
+      <text class="tips-title">💡 上传说明</text>
+
+      <view class="tips-list">
+        <text class="tip-item">📷 支持 1-3 张照片上传</text>
+        <text class="tip-item">🖼️ 图片格式：JPG、PNG</text>
+        <text class="tip-item">📏 单张图片大小不超过 5MB</text>
+        <text class="tip-item">👀 公开的照片将展示在年夜饭照片墙</text>
+        <text class="tip-item">🎊 上传后即可在照片墙看到您的年夜饭</text>
+      </view>
+
+      <navigator url="/pages/gallery/gallery" open-type="switchTab" class="btn btn-outline btn-block">
+        查看年夜饭照片墙 →
+      </navigator>
+    </view>
+  </view>
+</view>
